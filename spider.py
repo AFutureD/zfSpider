@@ -33,15 +33,12 @@ class Student:
             'User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'
         response = self.session.get(self.baseUrl)
         self.baseUrl = response.url
-        # print(baseUrl)
         self.baseUrl = re.subn(r'.default2.aspx', '', self.baseUrl)[0]
         loginUrl = self.baseUrl + '/default2.aspx'
-        # print(loginurl)
-
         response = self.session.get(loginUrl)
         __VIEWSTATE = re.findall("name=\"__VIEWSTATE\" value=\"(.*?)\"", response.content.decode('GBK'))[0]
         # print(__VIEWSTATE)
-        print("Got viewatate");
+        print("Got viewatate")
         print( "正在获取验证码......" )
         imgUrl = self.baseUrl + "/CheckCode.aspx?"
         imgresponse = self.session.get(imgUrl, stream=True)
@@ -54,9 +51,7 @@ class Student:
         command = "start" + " \"\" " + DstDir +"code.jpg"
         x = os.popen( command ).read( )
         code = input("验证码是：")
-
         RadioButtonList1 = u"学生".encode('gb2312', 'replace')
-
         data = {
             "RadioButtonList1": RadioButtonList1,
             "__VIEWSTATE": __VIEWSTATE,
@@ -67,8 +62,6 @@ class Student:
         }
 
         Loginresponse = self.session.post(loginUrl, data=data)
-        # print(Loginresponse.status_code)
-        # print(Loginresponse.headers)
         if Loginresponse.status_code == requests.codes.ok:
             print("成功进入教务系统！")
 
@@ -83,15 +76,9 @@ class Student:
         个人课表
     '''
     def sp_class(self):
-        self.headers['Referer'] = self.baseUrl + '/xs_main.aspx?xh=' + self.st_num
+        self.session.headers['Referer'] = self.baseUrl + '/xs_main.aspx?xh=' + self.st_num
         url2 = self.baseUrl + "/xskbcx.aspx?xh=" +  self.st_num + "&xm=" + self.urlName + "&gnmkdm=N121603"
-        # print('2' + url2)
-
         response2 = self.session.post(url2)
-        # print(response2.content.decode('GBK'))
-        # print('3' + url2)
-        # print( '4' +response2.url)
-
         ans = response2.text #.encode("GBK")
         return ans
 
@@ -101,14 +88,11 @@ class Student:
     '''
     def sp_GPA(self):
         url3_1 = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.urlName + "&gnmkdm=N121605"
-        # print('1' + url3_1)
         self.session.headers['Referer'] = self.baseUrl + '/xs_main.aspx?xh=' + self.st_num
         response3_1 = self.session.get(url3_1)
         html = response3_1.content.decode("gb2312")
         soup = BeautifulSoup(html,'html.parser')
         __VIEWSTATE3 = soup.findAll('input')[2]['value']
-        # print(__VIEWSTATE3)
-
         self.session.headers['Referer'] = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.urlName + "&gnmkdm=N121605"
         data3 = {
             "__EVENTTARGET":"",
@@ -121,7 +105,6 @@ class Student:
             "btn_xq" : u"学期成绩".encode('gb2312', 'replace')
         }
         response3 = self.session.post(url3_1,data=data3)
-        # print( '2' +response3.url)
 
         ans = response3.content #.decode('GBK')
         return ans
