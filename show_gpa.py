@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on 2016.12.02
+@author: 15999222
+"""
+
 import parserInfo
-import os
 from prettytable import PrettyTable
 def show_GPA(ob):
 	gpa_all = parserInfo.get_GPA(ob)

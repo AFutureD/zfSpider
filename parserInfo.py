@@ -1,6 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on 2016.12.02
+@author: 15999222
+"""
+
 from bs4 import BeautifulSoup
-import os
-import spider
 
 def get_GPA(ob):
     

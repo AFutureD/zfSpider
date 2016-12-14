@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Created on 2016.12.02
+@author: 15999222
+"""
+
 import cal
 import spider
 import show_gpa
