@@ -6,6 +6,7 @@ Created on 2016.12.02
 
 import re
 from uuid import uuid1
+from prettytable import PrettyTable
 from icalendar import Calendar, Event
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
@@ -44,22 +45,23 @@ def get_ics(schedule):
 
     for line in schedule:
         event = Event()
-        print(line)
+        # print(line)
         # line should be like this: ['汇编语言程序设计', '周三第7,8节', '第10-10周|双周', '第1实验楼B403-A', '刘小洋(刘小洋)']
 
         info_day = re.findall(r'周(.*?)第(\d+),(\d+)节', line['time'])
         info_day = info_day[0]
-        print(info_day)
+        # print(info_day)
         # info_day should be like this: ('三', '7', '8')
 
         info_week = re.findall(r'第(\d+)-(\d+)周', line['time'])
         info_week = info_week[0]
-        print(info_week)
+        # print(info_week)
         # info_week should be like this: ('10', '10')
 
         dtstart_date = start_monday + relativedelta(weeks=(int(info_week[0]) - 1)) + relativedelta(days=int(dict_week[info_day[0]]))
         dtstart_datetime = datetime.combine(dtstart_date, datetime.min.time())
         dtstart = dtstart_datetime + dict_day[int(info_day[1])]
+
         dtend = dtstart + relativedelta(hours=1, minutes=40)
 
             # BEGIN:VEVENT
@@ -79,11 +81,11 @@ def get_ics(schedule):
         repeat = re.findall(r'\|(.*?)周', line['time'])
         if len(repeat) == 0:
             interval = 1
-            print("yes")
+            # print("yes")
         else:
-            print("NO")
+            # print("NO")
             interval = 2
-            print(repeat)
+            # print(repeat)
             dtstart = dtstart + repeat_week[repeat[0]]
             dtend = dtend + repeat_week[repeat[0]]
         # 如果有单双周的课 那么这些课隔一周上一次
@@ -126,11 +128,16 @@ def get_cal(ob):
 
     print("获取成功!")
     print("\n课表是...")
+
+    table = PrettyTable( )
+    table.field_names = ['课程名', '类型', '时间', '教师', '地点']
     for line in schedule:
-        print(line)
+        table.add_row( [ line['name'], line['type'], line['time'], line['teacher'], line['place'] ] )
+    print( table )
+
     print("\n正在生成 ics 文件...")
     ics = get_ics(schedule)
-    print(display(ics))
+    # print(display(ics))
     print("生成成功!")
 
     file_name = 'output.ics'

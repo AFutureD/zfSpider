@@ -82,9 +82,23 @@ class Student:
         个人课表
     '''
     def sp_class(self):
+        url2 = self.baseUrl + "/xskbcx.aspx?xh=" + self.st_num + "&xm=" + self.urlName + "&gnmkdm=N121603"
         self.session.headers['Referer'] = self.baseUrl + '/xs_main.aspx?xh=' + self.st_num
-        url2 = self.baseUrl + "/xskbcx.aspx?xh=" +  self.st_num + "&xm=" + self.urlName + "&gnmkdm=N121603"
-        response2 = self.session.post(url2)
+        response2 = self.session.get( url2 )
+        html = response2.content.decode( "gb2312" )
+        soup = BeautifulSoup( html, 'html.parser' )
+        __VIEWSTATE2 = soup.findAll( 'input' )[2]['value']
+        print(__VIEWSTATE2)
+
+        self.session.headers['Referer'] = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.urlName + "&gnmkdm=N121603"
+        data2 = {
+            '__EVENTTARGET':'xqd',
+            '__EVENTARGUMENT':'',
+            '__VIEWSTATE':__VIEWSTATE2,
+            'xnd':'2016-2017',
+            'xqd':'2',
+        }
+        response2 = self.session.post(url2,data = data2)
         ans = response2.text #.encode("GBK")
         return ans
 
@@ -99,6 +113,7 @@ class Student:
         html = response3_1.content.decode("gb2312")
         soup = BeautifulSoup(html,'html.parser')
         __VIEWSTATE3 = soup.findAll('input')[2]['value']
+
         self.session.headers['Referer'] = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.urlName + "&gnmkdm=N121605"
         data3 = {
             "__EVENTTARGET":"",

@@ -43,7 +43,7 @@ def get_sch(ob):
     # with open(DstDir + "kebiao.html","rb") as a:
     #     kebiaoOrigin = a.read()
 
-    kebiaoOrigin = ob.sp_Class()
+    kebiaoOrigin = ob.sp_class()
     cus = -1
     Class ={'type':'','time':'','place':'','teacher':'','name':''}
     class_All = []
