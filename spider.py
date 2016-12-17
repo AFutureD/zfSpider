@@ -9,7 +9,8 @@ import re
 import requests
 from bs4 import BeautifulSoup
 
-
+XN = ["2015-2016","2016-2017"]
+XQ = ["1","2"]
 class Student:
     def __init__(self):
         self.st_num = '15999222'  # 学号
@@ -49,11 +50,12 @@ class Student:
         imgUrl = self.baseUrl + "/CheckCode.aspx?"
         imgresponse = self.session.get(imgUrl, stream=True)
         image = imgresponse.content
-        DstDir = os.getcwd() + "\\"
-
+        DstDir = os.getcwd() + "/"
+        print(DstDir)
         with open(DstDir + "code.jpg", "wb") as jpg:
             jpg.write(image)
             print("保存验证码到：" + DstDir + "code.jpg" + "\n")
+
         command = "start" + " \"\" " + DstDir +"code.jpg"
         x = os.popen( command ).read( )
         code = input("验证码是：")
@@ -82,6 +84,12 @@ class Student:
         个人课表
     '''
     def sp_class(self):
+        # 选择学期
+        choice = int(input("清选择学期：1、2015-2016 第一学期\t2、2015-2016 第二学期\n3、2016-2017 第一学期\t4、2016-2017 第二学期\n"))
+        xn = XN[(choice -1)/2]
+        xq = XQ[choice % 2]
+
+        # 从课程便初始页面获取__VIEWSTATE
         url2 = self.baseUrl + "/xskbcx.aspx?xh=" + self.st_num + "&xm=" + self.urlName + "&gnmkdm=N121603"
         self.session.headers['Referer'] = self.baseUrl + '/xs_main.aspx?xh=' + self.st_num
         response2 = self.session.get( url2 )
@@ -95,8 +103,8 @@ class Student:
             '__EVENTTARGET':'xqd',
             '__EVENTARGUMENT':'',
             '__VIEWSTATE':__VIEWSTATE2,
-            'xnd':'2016-2017',
-            'xqd':'2',
+            'xnd':xn,
+            'xqd':xq,
         }
         response2 = self.session.post(url2,data = data2)
         ans = response2.text #.encode("GBK")
@@ -107,6 +115,11 @@ class Student:
     GPA 学期
     '''
     def sp_GPA(self):
+        # 选择学期
+        choice = int(input("清选择学期：1、2015-2016 第一学期\t2、2015-2016 第二学期\n3、2016-2017 第一学期\t4、2016-2017 第二学期\n"))
+        xn = XN[(choice - 1) / 2]
+        xq = XQ[choice % 2]
+
         url3_1 = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.urlName + "&gnmkdm=N121605"
         self.session.headers['Referer'] = self.baseUrl + '/xs_main.aspx?xh=' + self.st_num
         response3_1 = self.session.get(url3_1)
@@ -120,8 +133,8 @@ class Student:
             "__EVENTARGUMENT":"",
             "__VIEWSTATE":__VIEWSTATE3,
             'hidLanguage':"",
-            "ddlXN":'2015-2016',
-            "ddlXQ":'1',
+            "ddlXN":xn,
+            "ddlXQ":xq,
             "ddl_kcxz":"",
             "btn_xq" : u"学期成绩".encode('gb2312', 'replace')
         }
