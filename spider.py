@@ -98,14 +98,17 @@ class Student:
             print(title)
             if title.find(IFLOGIN) != -1:
                 print("登录失败，正在重新登录......")
+                IFCONTINUE = input("输入 0 以结束")
+                if IFCONTINUE == '0':
+                    break
             else:
                 status = False
-
-        print("成功登录教务系统")
+        if not status:
+            print("成功登录教务系统")
+        else:
+            print("登录教务系统终止！！！")
         # succeed
         return 1
-
-
 
     # print(Loginresponse.content.decode('GBK'))
 
