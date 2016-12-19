@@ -10,11 +10,10 @@ import re
 import requests
 from bs4 import BeautifulSoup
 
-# XN = {'1':"2015-2016",'2':"2015-2016","3":"2016-2017","4":"2016-2017"}
-# XQ = {'1':"1",'2':"2","3":"1","4":"2"}
-
 XN = ["2015-2016","2016-2017"]
 XQ = ["1","2"]
+IFLOGIN = "请登录"
+
 class Student:
     def __init__(self):
         self.st_num = '15999222'  # 学号
@@ -35,59 +34,74 @@ class Student:
         self.classname = ''  # 所在班级
         self.gradeClass = ''  # 年级
         self.session = requests.session()
-        self.baseUrl = "http://210.30.208.140/"
+        self.baseUrl = "http://210.30.208.200/"
 
     def login(self):
         # 访问教务系统
+        status = True
         print("正在尝试登录......")
-        self.session.headers[
-            'User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'
+        self.session.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'
         response = self.session.get(self.baseUrl)
         self.baseUrl = response.url
         self.baseUrl = re.subn(r'.default2.aspx', '', self.baseUrl)[0]
         loginUrl = self.baseUrl + '/default2.aspx'
-        response = self.session.get(loginUrl)
-        __VIEWSTATE = re.findall("name=\"__VIEWSTATE\" value=\"(.*?)\"", response.content.decode('GBK'))[0]
-        # print(__VIEWSTATE)
-        print("Got viewatate")
-        print( "正在获取验证码......" )
-        imgUrl = self.baseUrl + "/CheckCode.aspx?"
-        imgresponse = self.session.get(imgUrl, stream=True)
-        image = imgresponse.content
 
-        # 保存code
-        if 'Linux' in platform.system():
-            DstDir = os.getcwd() + "/"
-            print(DstDir)
-            with open(DstDir + "code.jpg", "wb") as jpg:
-                jpg.write(image)
-                print("保存验证码到：" + DstDir + "code.jpg" + "\n")
+        while (status):
+            response = self.session.get(loginUrl)
+            __VIEWSTATE = re.findall("name=\"__VIEWSTATE\" value=\"(.*?)\"", response.content.decode('GBK'))[0]
+            # print(__VIEWSTATE)
+            print("Got viewatate")
+            print( "正在获取验证码......" )
+            imgUrl = self.baseUrl + "/CheckCode.aspx?"
+            imgresponse = self.session.get(imgUrl, stream=True)
+            image = imgresponse.content
 
-            os.popen("display " + DstDir + "code.jpg")
-        else:
-            DstDir = os.getcwd() + "\\"
-            print(DstDir)
-            with open(DstDir + "code.jpg", "wb") as jpg:
-                jpg.write(image)
-                print("保存验证码到：" + DstDir + "code.jpg" + "\n")
+            # 保存code
+            if 'Linux' in platform.system():
+                DstDir = os.getcwd() + "/"
+                # print(DstDir)
+                with open(DstDir + "code.jpg", "wb") as jpg:
+                    jpg.write(image)
+                    print("保存验证码到：" + DstDir + "code.jpg" + "\n")
 
-            command = "start" + " \"\" " + DstDir +"code.jpg"
-            x = os.popen( command ).read( )
-        code = input("验证码是：")
-        RadioButtonList1 = u"学生".encode('gb2312', 'replace')
-        data = {
-            "RadioButtonList1": RadioButtonList1,
-            "__VIEWSTATE": __VIEWSTATE,
-            "txtUserName": self.st_num,
-            "TextBox2": self.password,
-            "Button1": "",
-            "txtSecretCode": code,
-        }
+                os.popen("display " + DstDir + "code.jpg")
+            else:
+                DstDir = os.getcwd() + "\\"
+                print(DstDir)
+                with open(DstDir + "code.jpg", "wb") as jpg:
+                    jpg.write(image)
+                    print("保存验证码到：" + DstDir + "code.jpg" + "\n")
 
-        Loginresponse = self.session.post(loginUrl, data=data)
-        if Loginresponse.status_code == requests.codes.ok:
-            print("成功进入教务系统！")
+                command = "start" + " \"\" " + DstDir +"code.jpg"
+                x = os.popen( command ).read()
 
+            code = input("验证码是：")
+            RadioButtonList1 = u"学生".encode('gb2312', 'replace')
+            data = {
+                "RadioButtonList1": RadioButtonList1,
+                "__VIEWSTATE": __VIEWSTATE,
+                "txtUserName": self.st_num,
+                "TextBox2": self.password,
+                "Button1": "",
+                "txtSecretCode": code,
+            }
+
+            Loginresponse = self.session.post(loginUrl, data=data)
+            print("尝试登录中......")
+
+            url2 = self.baseUrl + "/xs_main.aspx?xh=" + self.st_num
+            self.session.headers['Referer'] = self.baseUrl + "default2.aspx"
+            response2 = self.session.get(url2)
+            html = response2.content.decode("gb2312")
+            soup = BeautifulSoup(html, 'html.parser')
+            title = soup.title.get_text()
+            print(title)
+            if title.find(IFLOGIN) != -1:
+                print("登录失败，正在重新登录......")
+            else:
+                status = False
+
+        print("成功登录教务系统")
         # succeed
         return 1
 
@@ -122,7 +136,7 @@ class Student:
             'xqd':xq,
         }
         response2 = self.session.post(url2,data = data2)
-        ans = response2.text #.encode("GBK")
+        ans = response2.text
         return ans
 
 
@@ -133,7 +147,7 @@ class Student:
         # 选择学期
         choice = int(input("清选择学期：\n\t\t1、2015-2016 第一学期\t2、2015-2016 第二学期\n\t\t3、2016-2017 第一学期\t4、2016-2017 第二学期\n"))
         xn = XN[int((choice - 1)/2)]
-        xq = XQ[int(choice / 2)]
+        xq = XQ[int((choice - 1) % 2 )]
 
         url3_1 = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.urlName + "&gnmkdm=N121605"
         self.session.headers['Referer'] = self.baseUrl + '/xs_main.aspx?xh=' + self.st_num
@@ -155,5 +169,5 @@ class Student:
         }
         response3 = self.session.post(url3_1,data=data3)
 
-        ans = response3.content #.decode('GBK')
+        ans = response3.content
         return ans
