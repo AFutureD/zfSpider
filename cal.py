@@ -35,8 +35,8 @@ def get_ics(schedule):
     cal['prodid'] = '-//Apple Inc.//Mac OS X 10.12.1//EN'  # *mandatory elements* where the prodid can be changed, see RFC 5445
     cal['X-WR-TIMEZONE'] = 'Asia/Shanghai'
 
-    start_monday = date(2016, 8, 29)  # 开学第一周星期一的时间
-    end_sunday = date(2016, 12, 30)
+    start_monday = date(2017, 2, 27)  # 开学第一周星期一的时间
+    end_sunday = date(2017, 6, 11)
     dict_week = {'一': 0, '二': 1, '三': 2, '四': 3, '五': 4, '六': 5, '日': 6}
     dict_day = {1: relativedelta(hours=8, minutes=20), 3: relativedelta(hours=10, minutes=15),
                 5: relativedelta(hours=13, minutes=0), 7: relativedelta(hours=14, minutes=50),

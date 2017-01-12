@@ -34,7 +34,7 @@ class Student:
         self.classname = ''  # 所在班级
         self.gradeClass = ''  # 年级
         self.session = requests.session()
-        self.baseUrl = "http://210.30.208.200/"
+        self.baseUrl = "http://210.30.208.140/"
 
     def login(self):
         # 访问教务系统
@@ -63,17 +63,23 @@ class Student:
                 with open(DstDir + "code.jpg", "wb") as jpg:
                     jpg.write(image)
                     print("保存验证码到：" + DstDir + "code.jpg" + "\n")
-
                 os.popen("display " + DstDir + "code.jpg")
-            else:
+
+            elif 'windows' in platform.system():
                 DstDir = os.getcwd() + "\\"
                 print(DstDir)
                 with open(DstDir + "code.jpg", "wb") as jpg:
                     jpg.write(image)
                     print("保存验证码到：" + DstDir + "code.jpg" + "\n")
-
                 command = "start" + " \"\" " + DstDir +"code.jpg"
-                x = os.popen( command ).read()
+                os.popen( command ).read()
+            elif 'Darwin' in platform.system():
+                DstDir = os.getcwd() + "/"
+                # print(DstDir)
+                with open(DstDir + "code.jpg", "wb") as jpg:
+                    jpg.write(image)
+                    print("保存验证码到：" + DstDir + "code.jpg" + "\n")
+                os.popen("open " + DstDir + "code.jpg")
 
             code = input("验证码是：")
             RadioButtonList1 = u"学生".encode('gb2312', 'replace')
@@ -139,7 +145,7 @@ class Student:
             'xqd':xq,
         }
         response2 = self.session.post(url2,data = data2)
-        ans = response2.text
+        ans = response2.content.decode('GBK')
         return ans
 
 
@@ -172,5 +178,5 @@ class Student:
         }
         response3 = self.session.post(url3_1,data=data3)
 
-        ans = response3.content
+        ans = response3.content.decode('GBK')
         return ans
