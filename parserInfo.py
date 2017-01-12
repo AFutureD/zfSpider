@@ -6,13 +6,9 @@ Created on 2016.12.02
 
 from bs4 import BeautifulSoup
 
-def get_GPA(ob):
-    
-    # DstDir = os.getcwd() + "/"
-    # with open(DstDir + "gpa.txt","rb") as a:
-    #     gpa = a.read()
 
-    gpa = ob.sp_GPA()
+def get_GPA(responser):
+    gpa = responser
 
     soup = BeautifulSoup(gpa,'html.parser').find(id="Datagrid1").findAll('tr')
     gpa = {'name':'','xf':'','jd':'','ps':'','qz':'','qm':'','cj':''}
@@ -37,17 +33,13 @@ def get_GPA(ob):
 
     return gpa_all
 
-def get_sch(ob):
-    
-    # DstDir = os.getcwd() + "/"
-    # with open(DstDir + "kebiao.html","rb") as a:
-    #     kebiaoOrigin = a.read()
 
-    kebiaoOrigin = ob.sp_class()
+def get_sch(responser):
+    kebiaoOrigin = responser
     cus = -1
     Class ={'type':'','time':'','place':'','teacher':'','name':''}
     class_All = []
-    table_nodes = BeautifulSoup(kebiaoOrigin,'html.parser',from_encoding = 'utf8').find(id="Table1").findAll('tr')
+    table_nodes = BeautifulSoup(kebiaoOrigin,'html.parser').find(id="Table1").findAll('tr')
 
 
     i = 1

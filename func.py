@@ -5,12 +5,13 @@ Created on 2016.12.02
 """
 
 import re
+import parserInfo
 from uuid import uuid1
-from prettytable import PrettyTable
 from icalendar import Calendar, Event
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-import parserInfo
+from prettytable import PrettyTable
+
 
 def display(cal):
     return cal.to_ical().decode('utf-8').replace('\r\n', '\n').strip()
@@ -18,17 +19,10 @@ def display(cal):
 
 def get_ics(schedule):
 
-
-    """
-    BEGIN:VCALENDAR
-    METHOD:PUBLISH
-    VERSION:2.0 // <
-    X-WR-CALNAME:课程表
-    PRODID:-//Apple Inc.//Mac OS X 10.12.1//EN // <
-    X-APPLE-CALENDAR-COLOR:#FF2968
-    X-WR-TIMEZONE:Asia/Shanghai <
-    CALSCALE:GREGORIAN
-    """
+    # BEGIN:VCALENDAR
+    # VERSION:2.0
+    # PRODID:-//Apple Inc.//Mac OS X 10.12.1//EN
+    # X-WR-TIMEZONE:Asia/Shanghai
 
     cal = Calendar()
     cal['version'] = '2.0'
@@ -45,18 +39,13 @@ def get_ics(schedule):
 
     for line in schedule:
         event = Event()
-        # print(line)
         # line should be like this: ['汇编语言程序设计', '周三第7,8节', '第10-10周|双周', '第1实验楼B403-A', '刘小洋(刘小洋)']
 
         info_day = re.findall(r'周(.*?)第(\d+),(\d+)节', line['time'])
         info_day = info_day[0]
-        # print(info_day)
-        # info_day should be like this: ('三', '7', '8')
 
         info_week = re.findall(r'第(\d+)-(\d+)周', line['time'])
         info_week = info_week[0]
-        # print(info_week)
-        # info_week should be like this: ('10', '10')
 
         dtstart_date = start_monday + relativedelta(weeks=(int(info_week[0]) - 1)) + relativedelta(days=int(dict_week[info_day[0]]))
         dtstart_datetime = datetime.combine(dtstart_date, datetime.min.time())
@@ -64,19 +53,15 @@ def get_ics(schedule):
 
         dtend = dtstart + relativedelta(hours=1, minutes=40)
 
-            # BEGIN:VEVENT
-            # CREATED:20160707T102231Z <
-            # UID:82EA36A8-A6D9-4F72-ADC4-EB365500BC01 <
-            # RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=20170101T155959Z //interval 表示时间间隔
-            # DTEND;TZID=Asia/Shanghai:20160909T115000
-            # TRANSP:OPAQUE
-            # X-APPLE-TRAVEL-ADVISORY-BEHAVIOR:AUTOMATIC
-            # SUMMARY:博文206 - 线性代数
-            # DTSTART;TZID=Asia/Shanghai:20160909T101500
-            # DTSTAMP:20160707T102232Z
-            # LAST-MODIFIED:20160707T102231Z
-            # SEQUENCE:0
-            # END:VEVENT
+        # BEGIN:VEVENT
+        # SUMMARY:面向对象的程序设计C++ - 博文309
+        # DTSTART;VALUE=DATE-TIME:20170228T082000
+        # DTEND;VALUE=DATE-TIME:20170228T100000
+        # DTSTAMP;VALUE=DATE-TIME:20170113T004630Z
+        # UID:ab3f7f5c-d8e6-11e6-93a5-784f4351fe2b@Dong
+        # RRULE:FREQ=WEEKLY;UNTIL=20170611;INTERVAL=1
+        # CREATED;VALUE=DATE-TIME:20170113T004630Z
+        # END:VEVENT
 
         repeat = re.findall(r'\|(.*?)周', line['time'])
         if len(repeat) == 0:
@@ -105,25 +90,15 @@ def get_ics(schedule):
     return cal
 
 
-def get_cal(ob):
+def get_cal(info):
     print("正在获取课程表...")
-    schedule = parserInfo.get_sch(ob)
+    schedule = info
 
     # schedule should be like this:
     #    [{'type': '学必', 'name': 'JAVA程序设计', 'place': '博文205', 'time': '周一第1,2节{第1-18周}', 'teacher': '穆宝良'},
     #     {'type': '学必', 'name': '数字电路数字逻辑', 'place': '软件118', 'time': '周二第1,2节{第1-18周}', 'teacher': '王晓薇'},
     #     {'type': '通必', 'name': '大学外语3', 'place': '汇文509', 'time': '周三第1,2节{第1-18周}', 'teacher': '李静'},
-    #     {'type': '学必', 'name': '线性代数', 'place': '博文206', 'time': '周一第3,4节{第1-15周}', 'teacher': '耿莹'},
-    #     {'type': '通必', 'name': '体育3', 'place': '', 'time': '周四第3,4节{第1-18周}', 'teacher': '王瑾'},
     #     {'type': '学必', 'name': '线性代数', 'place': '博文206', 'time': '周五第3,4节{第1-15周|双周}', 'teacher': '耿莹'},
-    #     {'type': '学必', 'name': '数字电路数字逻辑', 'place': '博文409', 'time': '周三第5,6节{第1-18周}', 'teacher': '王晓薇'},
-    #     {'type': '学必', 'name': 'JAVA程序设计', 'place': '博文106', 'time': '周四第5,6节{第1-18周}', 'teacher': '穆宝良'},
-    #     {'type': '通必', 'name': '大学外语3', 'place': '汇文509', 'time': '周一第7,8节{第1-18周}', 'teacher': '李静'},
-    #     {'type': '学必', 'name': '数据结构', 'place': '博文401', 'time': '周二第7,8节{第1-18周}', 'teacher': '穆宝良'},
-    #     {'type': '学必', 'name': '专业外语', 'place': '博文309', 'time': '周三第7,8节{第1-15周}', 'teacher': '崔黎黎'},
-    #     {'type': '学必', 'name': '数据结构', 'place': '博文201', 'time': '周四第7,8节{第1-18周}', 'teacher': '穆宝良'},
-    #     {'type': '学必', 'name': '专业外语', 'place': '博文102', 'time': '周五第7,8节{第1-15周}', 'teacher': '崔黎黎'},
-    #     {'type': '通选', 'name': '学在旅途 实用英语', 'place': '博文305', 'time': '周三第9,10节{第1-15周}', 'teacher': '孔瑜'},
     #     {'type': '通选', 'name': '教育与生活', 'place': '博文206', 'time': '周四第9,10节{第1-15周}', 'teacher': '蒋春洋'}]
 
     print("获取成功!")
@@ -148,3 +123,12 @@ def get_cal(ob):
             print('保存成功!')
         else:
             print('保存失败!')
+
+
+def show_GPA(info):
+    gpa_all = info
+    table = PrettyTable()
+    table.field_names = ['课程名','学分','绩点','平时成绩','期中成绩','期末成绩','最终成绩']
+    for line in gpa_all:
+        table.add_row([line['name'],line['xf'],line['jd'],line['ps'], line['qz'],line['qm'],line['cj']])
+    print(table)
