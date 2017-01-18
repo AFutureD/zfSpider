@@ -8,7 +8,8 @@ import func
 import parserInfo
 from spider import Student
 
-if __name__ == "__main__":
+
+def main():
     ob = Student(num = '15999222',password = 'dhn78834',name = '董华楠')
     ob.login()
     while 1:
@@ -24,5 +25,11 @@ if __name__ == "__main__":
             responser = ob.sp_GPA()
             info = parserInfo.get_GPA(responser)
             func.show_GPA(info)
+
+    return 0
+
+
+if __name__ == "__main__":
+    main()
 
 
