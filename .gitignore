@@ -4,3 +4,4 @@ code.jpg
 try.py
 output.ics
 .vscode/
+*.pyc
