@@ -125,10 +125,13 @@ def get_cal(info):
             print('保存失败!')
 
 
-def show_GPA(info):
+def show_GP(info):
     gpa_all = info
     table = PrettyTable()
     table.field_names = ['课程名','学分','绩点','平时成绩','期中成绩','期末成绩','最终成绩']
     for line in gpa_all:
         table.add_row([line['name'],line['xf'],line['jd'],line['ps'], line['qz'],line['qm'],line['cj']])
     print(table)
+
+def show_GPA(info):
+    print(info)

@@ -13,7 +13,7 @@ def main():
     ob = Student(num = '15999222',password = 'dhn78834',name = '董华楠')
     ob.login()
     while 1:
-        switch = input("输入 1：获取课表并转为ical\t 2：查询学期成绩\t 0：结束\n")
+        switch = input("输入 1：获取课表并转为ical\t 2：查询学期成绩\t 3：查询平均学分绩点\t 0：结束\n")
         # print(switch)
         if switch == '0':
             break
@@ -21,10 +21,16 @@ def main():
             responser = ob.sp_class()
             info = parserInfo.get_sch(responser)
             func.get_cal(info)
+
         if switch == '2':
+            responser = ob.sp_GP()
+            info = parserInfo.get_GP(responser)
+            func.show_GP(info)
+
+        if switch == '3':
             responser = ob.sp_GPA()
-            info = parserInfo.get_GPA(responser)
-            func.show_GPA(info)
+            GPA = parserInfo.get_GPA(responser)
+            func.show_GPA(GPA)
 
     return 0
 

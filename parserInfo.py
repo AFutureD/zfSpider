@@ -7,7 +7,7 @@ Created on 2016.12.02
 from bs4 import BeautifulSoup
 
 
-def get_GPA(responser):
+def get_GP(responser):
     gpa = responser
 
     soup = BeautifulSoup(gpa,'html.parser').find(id="Datagrid1").findAll('tr')
@@ -66,3 +66,8 @@ def get_sch(responser):
         # print()
 
     return class_All
+
+def get_GPA(responser):
+    GPA = responser
+    ans = BeautifulSoup(GPA,'html.parser').find_all(id="pjxfjd")[0].get_text()
+    return ans

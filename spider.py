@@ -136,9 +136,9 @@ class Student:
 
 
     '''
-    GPA 学期
+    GPA
     '''
-    def sp_GPA(self):
+    def sp_GP(self):
         # 选择学期
         choice = int(input("清选择学期：\n\t\t1、2015-2016 第一学期\t2、2015-2016 第二学期\n\t\t3、2016-2017 第一学期\t4、2016-2017 第二学期\n"))
         xn = XN[int((choice - 1)/2)]
@@ -163,6 +163,39 @@ class Student:
             "btn_xq" : u"学期成绩".encode('gb2312', 'replace')
         }
         response3 = self.session.post(url3_1,data=data3)
+
+        ans = response3.content.decode('GBK')
+        return ans
+
+    '''
+    GPA
+    '''
+
+    def sp_GPA(self):
+        # 选择学期
+        choice = int(input("清选择学期：\n\t\t1、2015-2016 第一学期\t2、2015-2016 第二学期\n\t\t3、2016-2017 第一学期\t4、2016-2017 第二学期\n"))
+        xn = XN[int((choice - 1) / 2)]
+        xq = XQ[int((choice - 1) % 2)]
+
+        url3_1 = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121605"
+        self.session.headers['Referer'] = self.baseUrl + '/xs_main.aspx?xh=' + self.st_num
+        response3_1 = self.session.get(url3_1)
+        html = response3_1.content.decode("gb2312")
+        soup = BeautifulSoup(html, 'html.parser')
+        __VIEWSTATE3 = soup.findAll('input')[2]['value']
+
+        self.session.headers[
+            'Referer'] = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121605"
+
+        data3 = {"__EVENTTARGET": "",
+                 "__EVENTARGUMENT": "",
+                 "__VIEWSTATE": __VIEWSTATE3,
+                 'hidLanguage': "",
+                "ddlXN": xn,
+                 "ddlXQ": xq,
+                 "ddl_kcxz": "",
+                 "Button1": u"成绩统计".encode('gb2312', 'replace')}
+        response3 = self.session.post(url3_1, data=data3)
 
         ans = response3.content.decode('GBK')
         return ans
