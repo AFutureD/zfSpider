@@ -12,6 +12,7 @@ https://github.com/DongFrancis/ZhengfangSpider
 
 * 本项目需要以下几个库的支持：requests、BeautifulSoup、icalendar、prettytable。
 *  修改`main()`函数中的 `num`,`passward`,`name` 参数。其中num为学号，password为密码，name为你的真实姓名。
+*  修改spider.py文件中 `self.baseUrl` 的值为学校教务系统服务器地址。
 
 **开始使用**
 

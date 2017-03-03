@@ -18,9 +18,9 @@ IFLOGIN = "请登录"
 class Student:
     def __init__(self,num = None,password = None,name = None):
         self.st_num = num  # 学号
-        self.st_password = password # 'dhn78834' # 密码
-        self.st_name = name # '董华楠'  # 姓名
-        self.st_urlName = quote(self.st_name) # '%B6%AD%BB%AA%E9%AA'  # url编码后的姓名
+        self.st_password = password  # 密码
+        self.st_name = name  # 姓名
+        self.st_urlName = quote(self.st_name)  # url编码后的姓名
         self.session = requests.session()
         self.baseUrl = "http://210.30.208.140/"
 
@@ -90,13 +90,14 @@ class Student:
             soup = BeautifulSoup(html, 'html.parser')
             title = soup.title.get_text()
             print(title)
-            if title.find(IFLOGIN) != -1:
+            if title.find(IFLOGIN) != -1:  # To determine whether the login is successful
                 print("登录失败，正在重新登录......")
                 IFCONTINUE = input("输入 0 以结束")
                 if IFCONTINUE == '0':
                     break
             else:
                 status = False
+
         if not status:
             print("成功登录教务系统")
         else:
