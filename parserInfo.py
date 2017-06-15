@@ -37,7 +37,7 @@ def get_GP(responser):
 def get_sch(responser):
     kebiaoOrigin = responser
     cus = -1
-    Class ={'type':'','time':'','place':'','teacher':'','name':''}
+    Class ={'course_nature':'','time':'','course_place':'','course_teacher':'','course_name':'','course_id':''}
     class_All = []
     table_nodes = BeautifulSoup(kebiaoOrigin,'html.parser').find(id="Table1").findAll('tr')
 
@@ -56,12 +56,12 @@ def get_sch(responser):
                 if len(tmp) >= 2:
                     cls = Class.copy()
                     cus = cus + 1
-                    cls['name'] = tmp[0]
-                    cls['type'] = tmp[1]
+                    cls['course_name'] = tmp[0]
+                    cls['course_nature'] = tmp[1]
                     cls['time'] = tmp[2]
-                    cls['teacher'] = tmp[3]
+                    cls['course_teacher'] = tmp[3]
                     if len(tmp) >= 5:
-                        cls['place'] = tmp[4]
+                        cls['course_place'] = tmp[4]
                     class_All.append(cls)
         # print()
 
@@ -71,3 +71,15 @@ def get_GPA(responser):
     GPA = responser
     ans = BeautifulSoup(GPA,'html.parser').find_all(id="pjxfjd")[0].get_text()
     return ans
+
+def total_info(responser):
+    GPA = responser
+    ans = BeautifulSoup(GPA,'html.parser').find(id="Datagrid2").findAll('tr')
+    for tr in ans:
+        elem = tr
+        for td in elem.findAll( 'td' ):
+            print(td,end = ' ')
+        print()
+
+    #ans = BeautifulSoup(GPA,'html.parser').find_all(id="pjxfjd")[0].get_text()
+    return None

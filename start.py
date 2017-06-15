@@ -8,13 +8,21 @@ Created on 2016.12.02
 import func
 import parserInfo
 from spider import Student
+import command
 
 
 def main():
-    ob = Student(num = '15999222',password = 'dhn78834',name = '董华楠') # change your own num and password and name.
+    ob = Student(num = '15999222',password = 'dhn78834') # change your own num and password and name.
     ob.login() # login function,in order to log in the system.
+    ob.get_ess()
+    # cmd = command.results
+
+    # print(cmd.year)
+    # print(cmd.term)
+    # print(cmd.output)
+
     while 1:
-        switch = input("输入 1：获取课表并转为ical\t 2：查询学期成绩\t 3：查询平均学分绩点\t 0：结束\n")
+        switch = input("\n\n输入 1：获取课表并转为ical\t 2：查询学期成绩\t 3：查询平均学分绩点\t 0：结束\n")
         # print(switch)
         if switch == '0':
             break
@@ -33,8 +41,14 @@ def main():
             GPA = parserInfo.get_GPA(responser)
             func.show_GPA(GPA)
 
-    return 0
+        if switch == '4':
+            responser = ob.test()
+            print("HHHHHHHHH")
+            GPA = parserInfo.test( responser )
+            # func.show_GPA( GPA )
+            print(GPA)
 
+    return 0
 
 if __name__ == "__main__":
     main()
