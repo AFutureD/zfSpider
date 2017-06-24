@@ -1,11 +1,22 @@
 import pymysql
+import json
 
-conn = pymysql.connect(host = '123.207.229.127',port=3306,user = 'root', password='dhn78834',db='class',charset='utf8')
+class data_conn:
+    def __init__(self):
+        with open('base_info.json') as json_file:
+            base_data = json.load(json_file)
+        db_data = base_data['database']
+        self.hostname = db_data['db_hostname']
+        self.username = db_data['db_username']
+        self.passwd = db_data['db_passwd']
+        self.select_database = db_data['db_select_database']
+        self.conn = None
 
-cursor = conn.cursor()
+    def start(self):
+        self.conn = pymysql.connect(host = self.hostname,port=3306,user = self.username, password = self.passwd,
+                                    db = self.select_database,charset='utf8')
+        pass
 
-cursor.execute("select * from student_info WHERE Sid = '15999222'")
-
-print(cursor.fetchall())
-
-conn.close()
+    def end(self):
+        self.conn.close()
+        pass
