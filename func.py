@@ -42,51 +42,54 @@ def get_ics(schedule):
         # line should be like this: ['汇编语言程序设计', '周三第7,8节', '第10-10周|双周', '第1实验楼B403-A', '刘小洋(刘小洋)']
 
         info_day = re.findall(r'周(.*?)第(\d+),(\d+)节', line['time'])
-        info_day = info_day[0]
+        if len(info_day) != 0:
+            info_day = info_day[0]
 
         info_week = re.findall(r'第(\d+)-(\d+)周', line['time'])
-        info_week = info_week[0]
+        if len(info_week) != 0:
+            info_week = info_week[0]
 
-        dtstart_date = start_monday + relativedelta(weeks=(int(info_week[0]) - 1)) + relativedelta(days=int(dict_week[info_day[0]]))
-        dtstart_datetime = datetime.combine(dtstart_date, datetime.min.time())
-        dtstart = dtstart_datetime + dict_day[int(info_day[1])]
+        try:
+            dtstart_date = start_monday + relativedelta(weeks=(int(info_week[0]) - 1)) + relativedelta(days=int(dict_week[info_day[0]]))
+            dtstart_datetime = datetime.combine(dtstart_date, datetime.min.time())
+            dtstart = dtstart_datetime + dict_day[int(info_day[1])]
 
-        dtend = dtstart + relativedelta(hours=1, minutes=40)
+            dtend = dtstart + relativedelta(hours=1, minutes=40)
 
-        # BEGIN:VEVENT
-        # SUMMARY:面向对象的程序设计C++ - 博文309
-        # DTSTART;VALUE=DATE-TIME:20170228T082000
-        # DTEND;VALUE=DATE-TIME:20170228T100000
-        # DTSTAMP;VALUE=DATE-TIME:20170113T004630Z
-        # UID:ab3f7f5c-d8e6-11e6-93a5-784f4351fe2b@Dong
-        # RRULE:FREQ=WEEKLY;UNTIL=20170611;INTERVAL=1
-        # CREATED;VALUE=DATE-TIME:20170113T004630Z
-        # END:VEVENT
+            # BEGIN:VEVENT
+            # SUMMARY:面向对象的程序设计C++ - 博文309
+            # DTSTART;VALUE=DATE-TIME:20170228T082000
+            # DTEND;VALUE=DATE-TIME:20170228T100000
+            # DTSTAMP;VALUE=DATE-TIME:20170113T004630Z
+            # UID:ab3f7f5c-d8e6-11e6-93a5-784f4351fe2b@Dong
+            # RRULE:FREQ=WEEKLY;UNTIL=20170611;INTERVAL=1
+            # CREATED;VALUE=DATE-TIME:20170113T004630Z
+            # END:VEVENT
 
-        repeat = re.findall(r'\|(.*?)周', line['time'])
-        if len(repeat) == 0:
-            interval = 1
-            # print("yes")
-        else:
-            # print("NO")
-            interval = 2
-            # print(repeat)
-            dtstart = dtstart + repeat_week[repeat[0]]
-            dtend = dtend + repeat_week[repeat[0]]
-        # 如果有单双周的课 那么这些课隔一周上一次
+            repeat = re.findall(r'\|(.*?)周', line['time'])
+            if len(repeat) == 0:
+                interval = 1
+                # print("yes")
+            else:
+                # print("NO")
+                interval = 2
+                # print(repeat)
+                dtstart = dtstart + repeat_week[repeat[0]]
+                dtend = dtend + repeat_week[repeat[0]]
+            # 如果有单双周的课 那么这些课隔一周上一次
 
-        event.add('rrule',
-                  {'freq': 'weekly', 'interval': interval,
-                   'until': end_sunday})
-        # 设定重复次数
+            event.add('rrule',{'freq': 'weekly', 'interval': interval,'until': end_sunday})
+            # 设定重复次数
 
-        event.add('created', datetime.now())
-        event.add('uid', str(uuid1()) + '@Dong')
-        event.add('summary', line['name'] + ' - ' + line['place'])
-        event.add('dtstamp', datetime.now())
-        event.add('dtstart', dtstart)
-        event.add('dtend', dtend)
-        cal.add_component(event)
+            event.add('created', datetime.now())
+            event.add('uid', str(uuid1()) + '@Dong')
+            event.add('summary', line['course_name'] + ' - ' + line['course_place'])
+            event.add('dtstamp', datetime.now())
+            event.add('dtstart', dtstart)
+            event.add('dtend', dtend)
+            cal.add_component(event)
+        except:
+            print("an error")
     return cal
 
 
@@ -105,9 +108,9 @@ def get_cal(info):
     print("\n课表是...")
 
     table = PrettyTable( )
-    table.field_names = ['课程名', '类型', '时间', '教师', '地点']
+    table.field_names = ['课程名', '课程代码', '类型', '时间', '教师', '地点']
     for line in schedule:
-        table.add_row( [ line['name'], line['type'], line['time'], line['teacher'], line['place'] ] )
+        table.add_row( [ line['course_name'], line['course_id'], line['course_nature'], line['time'], line['course_teacher'], line['course_place'] ] )
     print( table )
 
     print("\n正在生成 ics 文件...")
