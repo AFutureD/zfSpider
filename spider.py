@@ -15,6 +15,10 @@ import func
 from database import data_conn
 import time
 import datetime
+from checkout import Predict
+from PIL import Image
+import warnings
+warnings.filterwarnings("ignore")
 
 IFLOGIN = "请登录"
 
@@ -38,7 +42,7 @@ class Student:
         # 访问教务系统
         status = True
         print("正在尝试登录......")
-        self.session.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'
+        self.session.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
         response = self.session.get(self.baseUrl)
         self.baseUrl = response.url
         self.baseUrl = re.subn(r'.default2.aspx', '', self.baseUrl)[0]
@@ -55,31 +59,38 @@ class Student:
             image = imgresponse.content
 
             # 保存code
+            DstDir = None
             if 'Linux' in platform.system():
-                DstDir = os.getcwd() + "/"
+                DstDir = os.getcwd() + "/" + "code.jpeg"
                 # print(DstDir)
-                with open(DstDir + "code.gif", "wb") as jpg:
+                with open(DstDir, "wb") as jpg:
                     jpg.write(image)
-                    print("保存验证码到：" + DstDir + "code.gif" + "\n")
-                os.popen("display " + DstDir + "code.gif")
+                    print("保存验证码到：" + DstDir)
+                os.popen("display " + DstDir)
 
             elif 'windows' in platform.system():
-                DstDir = os.getcwd() + "\\"
+                DstDir = os.getcwd() + "\\" + "code.jpeg"
                 # print(DstDir)
-                with open(DstDir + "code.gif", "wb") as jpg:
+                with open(DstDir, "wb") as jpg:
                     jpg.write(image)
-                    print("保存验证码到：" + DstDir + "code.gif" + "\n")
-                command = "start" + " \"\" " + DstDir +"code.gif"
+                    print("保存验证码到：" + DstDir)
+                command = "start" + " \"\" " + DstDir
                 os.popen( command ).read()
             elif 'Darwin' in platform.system():
-                DstDir = os.getcwd() + "/"
+                DstDir = os.getcwd() + "/" + "code.jpeg"
                 # print(DstDir)
-                with open(DstDir + "code.gif", "wb") as jpg:
+                with open(DstDir, "wb") as jpg:
                     jpg.write(image)
-                    print("保存验证码到：" + DstDir + "code.gif" + "\n")
-                os.popen("open " + DstDir + "code.gif")
+                    print("保存验证码到：" + DstDir)
+                os.popen("open " + DstDir)
 
-            code = input("验证码是：")
+            # code = input("验证码是：")
+            im = Image.open(DstDir)
+            im = im.convert('RGB')
+            im.save(DstDir, 'jpeg')
+            # print(DstDir)
+            code = Predict.load_Predict(DstDir)
+            print(code)
             RadioButtonList1 = u"学生".encode('gb2312', 'replace')
             data = {
                 "RadioButtonList1": RadioButtonList1,
