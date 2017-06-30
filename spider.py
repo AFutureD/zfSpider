@@ -13,7 +13,6 @@ from bs4 import BeautifulSoup
 import parserInfo
 import func
 from database import data_conn
-import time
 import datetime
 from checkout import Predict
 from PIL import Image
@@ -82,7 +81,7 @@ class Student:
                 with open(DstDir, "wb") as jpg:
                     jpg.write(image)
                     print("保存验证码到：" + DstDir)
-                os.popen("open " + DstDir)
+                # os.popen("open " + DstDir)
 
             # code = input("验证码是：")
             im = Image.open(DstDir)
