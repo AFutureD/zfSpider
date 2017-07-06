@@ -5,6 +5,8 @@ Created on 2016.12.02
 @author: 15999222
 """
 
+import os
+
 import func
 import parserInfo
 from spider import Student
