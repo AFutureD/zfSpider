@@ -1,10 +1,15 @@
 .idea/
 __pycache__/
-code.jpg
+code.jpeg
 try.py
 output.ics
 .vscode/
 *.pyc
 STUID.txt
 base_info_debug.json
+<<<<<<< HEAD
 base_info_pub.json
+=======
+base_info_pub.json
+checkout/__pycache__/
+command.py

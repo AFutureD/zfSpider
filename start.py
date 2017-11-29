@@ -8,33 +8,41 @@ Created on 2016.12.02
 import func
 import parserInfo
 from spider import Student
-import command
+# import command
+import json
+
 
 
 def main():
-    ob = Student(num = '15999222',password = 'dhn78834') # change your own num and password and name.
+
+    with open('base_info.json') as json_file:
+        base_data = json.load(json_file)
+    jiaowu_data = base_data['jiaowu']
+
+    ob = Student(num = jiaowu_data['stu_number'],password = jiaowu_data['stu_passwd'])
     ob.login() # login function,in order to log in the system.
     ob.get_ess()
-    # cmd = command.results
+    ob.latest_login_time()
 
-    # print(cmd.year)
-    # print(cmd.term)
-    # print(cmd.output)
+
 
     while 1:
-        switch = input("\n\n输入 1：获取课表并转为ical\t 2：查询学期成绩\t 3：查询平均学分绩点\t 0：结束\n")
-        # print(switch)
+        switch = input("\n输入 \n"
+                       "1：获取课表并转为ical\t "
+                       "2：查询学期成绩\t "
+                       "3：查询平均学分绩点\t "
+                       "4:更新数据\t "
+                       "0：结束\n")
+
         if switch == '0':
             break
         if switch == '1':
-            responser = ob.sp_class()  # get web content.
-            info = parserInfo.get_sch(responser)  # get the information you want.
-            func.get_cal(info)  # show those information.
+            xn, xq = ob.choices(info = 'course', type = 1)
+            func.show_courses(xn, xq)
 
         if switch == '2':
-            responser = ob.sp_GP()
-            info = parserInfo.get_GP(responser)
-            func.show_GP(info)
+            xn, xq = ob.choices(info = 'grade', type = 0)
+            func.show_grades(xn, xq)
 
         if switch == '3':
             responser = ob.sp_GPA()
@@ -42,11 +50,7 @@ def main():
             func.show_GPA(GPA)
 
         if switch == '4':
-            responser = ob.test()
-            print("HHHHHHHHH")
-            GPA = parserInfo.test( responser )
-            # func.show_GPA( GPA )
-            print(GPA)
+            ob.update_all_info()
 
     return 0
 

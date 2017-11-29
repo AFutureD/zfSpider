@@ -10,4 +10,19 @@ parser.add_argument('-o', action='store', dest='output', help='output the icalan
 parser.add_argument('--version', action='version', version='1.0')
 parser.add_argument('-r', '--interact', action='store_true', default=False, dest='interaction',help='Set mode,if you want to access the script as interaction')
 
+parser.add_argument('--update',  dest = '', help = 'Update all your informations.')
+parser.add_argument('-s', '--courses', dest = '')
+parser.add_argument('-g', '--grades', dest = '')
+
+parser.add_argument('--run')
+
+
 results = parser.parse_args()
+
+if results.run:
+    print(results.run)
+
+if not results.update:
+    print(results.update)
+
+print(results)

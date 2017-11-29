@@ -10,9 +10,15 @@ import re
 import requests
 from urllib.parse import quote
 from bs4 import BeautifulSoup
+import parserInfo
+import func
+from database import data_conn
+import datetime
+from checkout import Predict
+from PIL import Image
+import warnings
+warnings.filterwarnings("ignore")
 
-XN = ["2015-2016","2016-2017"]
-XQ = ["1", "2"]
 IFLOGIN = "请登录"
 
 
@@ -22,7 +28,6 @@ class Student:
         self.st_password = password  # 密码
         self.st_name = None  # 姓名
         self.st_urlName = None  # url编码后的姓名
-        # print(self.st_urlName)
         self.session = requests.session()
         self.baseUrl = "http://210.30.208.140/"
         self.avail_courses_year = []
@@ -36,7 +41,7 @@ class Student:
         # 访问教务系统
         status = True
         print("正在尝试登录......")
-        self.session.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'
+        self.session.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
         response = self.session.get(self.baseUrl)
         self.baseUrl = response.url
         self.baseUrl = re.subn(r'.default2.aspx', '', self.baseUrl)[0]
@@ -46,38 +51,45 @@ class Student:
             response = self.session.get(loginUrl)
             __VIEWSTATE = re.findall("name=\"__VIEWSTATE\" value=\"(.*?)\"", response.content.decode('GBK'))[0]
             # print(__VIEWSTATE)
-            print("Got viewatate")
+            # print("Got viewatate")
             print( "正在获取验证码......" )
             imgUrl = self.baseUrl + "/CheckCode.aspx?"
             imgresponse = self.session.get(imgUrl, stream=True)
             image = imgresponse.content
 
             # 保存code
+            DstDir = None
             if 'Linux' in platform.system():
-                DstDir = os.getcwd() + "/"
+                DstDir = os.getcwd() + "/" + "code.jpeg"
                 # print(DstDir)
-                with open(DstDir + "code.jpg", "wb") as jpg:
+                with open(DstDir, "wb") as jpg:
                     jpg.write(image)
-                    print("保存验证码到：" + DstDir + "code.jpg" + "\n")
-                os.popen("display " + DstDir + "code.jpg")
+                    print("保存验证码到：" + DstDir)
+                os.popen("display " + DstDir)
 
             elif 'windows' in platform.system():
-                DstDir = os.getcwd() + "\\"
-                print(DstDir)
-                with open(DstDir + "code.jpg", "wb") as jpg:
+                DstDir = os.getcwd() + "\\" + "code.jpeg"
+                # print(DstDir)
+                with open(DstDir, "wb") as jpg:
                     jpg.write(image)
-                    print("保存验证码到：" + DstDir + "code.jpg" + "\n")
-                command = "start" + " \"\" " + DstDir +"code.jpg"
+                    print("保存验证码到：" + DstDir)
+                command = "start" + " \"\" " + DstDir
                 os.popen( command ).read()
             elif 'Darwin' in platform.system():
-                DstDir = os.getcwd() + "/"
+                DstDir = os.getcwd() + "/" + "code.jpeg"
                 # print(DstDir)
-                with open(DstDir + "code.jpg", "wb") as jpg:
+                with open(DstDir, "wb") as jpg:
                     jpg.write(image)
-                    print("保存验证码到：" + DstDir + "code.jpg" + "\n")
-                os.popen("open " + DstDir + "code.jpg")
+                    print("保存验证码到：" + DstDir)
+                # os.popen("open " + DstDir)
 
-            code = input("验证码是：")
+            # code = input("验证码是：")
+            im = Image.open(DstDir)
+            im = im.convert('RGB')
+            im.save(DstDir, 'jpeg')
+            # print(DstDir)
+            code = Predict.load_Predict(DstDir)
+            print(code)
             RadioButtonList1 = u"学生".encode('gb2312', 'replace')
             data = {
                 "RadioButtonList1": RadioButtonList1,
@@ -110,6 +122,21 @@ class Student:
 
         if not status:
             print("成功登录教务系统")
+            ob_sql = data_conn()
+            ob_sql.start()
+            conn_new = ob_sql.conn
+            cursor = conn_new.cursor()
+            cursor.execute("select * from login_info WHERE stu_id = '%s'" % self.st_num)
+            now_time = datetime.date.today().isoformat()
+            if cursor.fetchone() is None:
+                cursor.execute("insert into login_info(stu_id,stu_passwd,login_time) \
+                                VALUES ('%s','%s','%s')" % (self.st_num,self.st_password,now_time))
+            else:
+                cursor.execute("delete from login_info where stu_id = '%s' " % self.st_num)
+                cursor.execute("insert into login_info(stu_id,stu_passwd,login_time) \
+                                            VALUES ('%s','%s','%s')" % (self.st_num, self.st_password, now_time))
+            conn_new.commit()
+            ob_sql.end()
         else:
             print("登录教务系统终止！！！")
         return 1
@@ -131,6 +158,13 @@ class Student:
         self.avail_courses_year = [item.get_text() for item in soup.find(id = 'xnd').find_all('option')]
         self.avail_courses_term = [item.get_text() for item in soup.find(id = 'xqd').find_all('option')]
 
+        url_info_course_schedule = self.baseUrl + "/xsxkqk.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121615"
+        self.session.headers['Referer'] = self.baseUrl + '/xs_main.aspx?xh=' + self.st_num
+        response2 = self.session.get(url_info_course_schedule)
+        html = response2.content.decode("gb2312")
+        soup = BeautifulSoup(html, 'html.parser')
+        self.__VIEWSTATE_info_course_schedule = soup.findAll('input')[2]['value']
+
         url3_1 = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121605"
         self.session.headers['Referer'] = self.baseUrl + '/xs_main.aspx?xh=' + self.st_num
         response3_1 = self.session.get(url3_1)
@@ -148,7 +182,71 @@ class Student:
         print("Got essential information.")
         pass
 
-    def ptch( self, year = None, term = None ):
+    def latest_login_time(self):
+
+        ob_sql = data_conn()
+        ob_sql.start()
+        conn_new = ob_sql.conn
+        cursor = conn_new.cursor()
+        cursor.execute("select login_time from login_info WHERE stu_id = '%s'" % self.st_num)
+        conn_new.commit()
+        time_info = cursor.fetchone()
+        ob_sql.end()
+
+        return time_info[0]
+
+    def update_all_info( self ):
+
+        time_info = self.latest_login_time()
+        now_time = datetime.date.today()
+
+        if (now_time - time_info).days < 2:
+            while 1:
+                ans = input("是否刷新数据？(y/n)\n")
+                if ans == 'y':
+                    print("开始更新所有数据 ......")
+                    break
+                elif ans == 'n':
+                    return
+                else:
+                    continue
+        print("开始更新课表")
+        for year in self.avail_courses_year:
+            for term in self.avail_courses_term:
+                print("更新第%s学年第%s学期中......" % (year,term))
+                responser  = self.sp_courses_schedule(year,term)
+                courses = parserInfo.get_courses_schedule(responser)
+                if courses == []:
+                    continue
+                # print(courses)
+                func.format_courses(courses)
+        print("课表更新完成")
+
+        print("开始更新成绩")
+        for year in self.avail_grade_year:
+            for term in self.avail_grade_term:
+                print("更新第%s学年第%s学期中......" % (year, term))
+                responser = self.sp_grades(year, term)
+                grades = parserInfo.get_grades(responser)
+                if grades == []:
+                    continue
+                func.format_grades(grades)
+                # print(grades)
+        print("成绩更新完成")
+
+
+        pass
+
+    def choices( self,info = 'course' , type  = 1):
+        '''info can only choice from course or grade, all of them must be a str'''
+
+        year = None; term = None
+        if info == 'course':
+            year = self.avail_courses_year
+            term = self.avail_courses_term
+        elif info == 'grade':
+            year = self.avail_grade_year
+            term = self.avail_grade_term
 
         print()
         for index,ayear in enumerate(year):
@@ -159,62 +257,67 @@ class Student:
             print('\t{0:}:第{1}{2:<12}'.format(index+1,aterm,'学期'), end = ' ')
         print(end = '\n\n')
 
-        pass
-
-    '''
-        个人课表
-    '''
-    def sp_class(self, year=None, term = None):
-        # 选择学期
-
-        self.ptch(year,term)
-
-        choice = int(input("请选择学年：\n"))
-        xn = self.avail_courses_year[int(choice)-1]
-        choice = int(input("请选择学年：\n"))
-        xq = self.avail_courses_term[int(choice)-1]
-        print(xn,xq)
-
-        self.session.headers['Referer'] = self.baseUrl + "/xskbcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121603"
-        data2 = {
-            '__EVENTTARGET':'xqd',
-            '__EVENTARGUMENT':'',
-            '__VIEWSTATE':self.__VIEWSTATE2,
-            'xnd':xn,
-            'xqd':xq,
-        }
-        url2 = self.baseUrl + "/xskbcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121603"
-        response2 = self.session.get(url2,data = data2)
-        ans = response2.content.decode('GBK')
-        # print(ans)
-        return ans
-
-    '''
-    GPA
-    '''
-    def sp_GP(self):
-        # 选择学期
-        self.ptch(self.avail_grade_year, self.avail_grade_term)
 
         while 1:
             choice = input("请选择学年：\n")
             if choice is not '':
                 try:
-                    xn = self.avail_grade_year[int(choice) - 1]
+                    xn = year[int(choice) - 1]
                     break
                 except:
                     print("请输入数字")
                     continue
+        if type == 1:
+            while 1:
+                choice = input("请选择学期：\n")
+                if choice is not '':
+                    try:
+                        xq = term[int(choice) - 1]
+                        break
+                    except:
+                        print("请输入数字")
+                        continue
+        else:
+            while 1:
+                choice = input("请选择学期（可不输入）：\n")
+                if choice is not '':
+                    try:
+                        xq = term[int(choice) - 1]
+                        break
+                    except:
+                        print("请输入数字")
+                        continue
+                else:
+                    xq = ''
+                    break
 
-        while 1:
-            choice = input("请选择学期：\n")
-            if choice is not '':
-                try:
-                    xq = self.avail_grade_term[int(choice) - 1]
-                    break
-                except:
-                    print("请输入数字")
-                    continue
+        return xn,xq
+
+    '''
+    GPA
+    '''
+    def sp_grades(self,xn = None,xq = None):
+        # 选择学期
+
+        # while 1:
+        #     choice = input("请选择学年：\n")
+        #     if choice is not '':
+        #         try:
+        #             xn = self.avail_grade_year[int(choice) - 1]
+        #             break
+        #         except:
+        #             print("请输入数字")
+        #             continue
+        #
+        # while 1:
+        #     choice = input("请选择学期：\n")
+        #     if choice is not '':
+        #         try:
+        #             xq = self.avail_grade_term[int(choice) - 1]
+        #             break
+        #         except:
+        #             print("请输入数字")
+        #             continue
 
         url3_1 = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121605"
         self.session.headers['Referer'] = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121605"
@@ -237,36 +340,31 @@ class Student:
     GPA
     '''
 
-    def sp_GPA(self):
+    def sp_GPA(self,xn = None,xq = None):
         # 选择学期
-        self.ptch(self.avail_grade_year, self.avail_grade_term)
 
-        while 1:
-            choice = input("请选择学年：\n")
-            if choice is not '':
-                try:
-                    xn = self.avail_grade_year[int(choice) - 1]
-                    break
-                except:
-                    print("请输入数字")
-                    continue
-
-        while 1:
-            choice = input("请选择学期（可不输入）：\n")
-            if choice is not '':
-                try:
-                    xq = self.avail_grade_term[int(choice) - 1]
-                    break
-                except:
-                    print("请输入数字")
-                    continue
-            else:
-                xq = ''
-                break
-        # choice = int(input("请选择学年：\n"))
-        # xn = self.avail_grade_year[int(choice) - 1]
-        # choice = int(input("请选择学年：\n"))
-        # xq = self.avail_grade_term[int(choice) - 1]
+        # while 1:
+        #     choice = input("请选择学年：\n")
+        #     if choice is not '':
+        #         try:
+        #             xn = self.avail_grade_year[int(choice) - 1]
+        #             break
+        #         except:
+        #             print("请输入数字")
+        #             continue
+        #
+        # while 1:
+        #     choice = input("请选择学期（可不输入）：\n")
+        #     if choice is not '':
+        #         try:
+        #             xq = self.avail_grade_term[int(choice) - 1]
+        #             break
+        #         except:
+        #             print("请输入数字")
+        #             continue
+        #     else:
+        #         xq = ''
+        #         break
 
         print(xn, xq)
 
@@ -285,32 +383,39 @@ class Student:
         ans = response3.content.decode('GBK')
         return ans
 
-    def test(self):
+    def sp_courses_schedule(self,xn = None,xq = None):
+
+        self.session.headers[
+            'Referer'] = self.baseUrl + "/xsxkqk.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121615"
+        data2 = {
+            '__EVENTTARGET': 'ddlXN',
+            '__EVENTARGUMENT': '',
+            '__VIEWSTATE': self.__VIEWSTATE_info_course_schedule,
+            'ddlXN': xn,
+            'ddlXQ': xq,
+        }
+        url2 = self.baseUrl + "/xsxkqk.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121615"
+        response2 = self.session.post(url2, data = data2)
+        ans = response2.content.decode('GBK')
+        # print(ans)
+        return ans
+
+    '''
+        个人课表
+    '''
+    def sp_class(self, xn = None,xq = None):
         # 选择学期
-        choice = int(
-            input( "清选择学期：\n\t\t1、2015-2016 第一学期\t2、2015-2016 第二学期\n\t\t3、2016-2017 第一学期\t4、2016-2017 第二学期\n" ) )
-        xn = XN[int( (choice - 1) / 2 )]
-        xq = XQ[int( (choice - 1) % 2 )]
 
-        url3_1 = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121605"
-        self.session.headers['Referer'] = self.baseUrl + '/xs_main.aspx?xh=' + self.st_num
-        response3_1 = self.session.get( url3_1 )
-        html = response3_1.content.decode( "gb2312" )
-        soup = BeautifulSoup( html, 'html.parser' )
-        __VIEWSTATE3 = soup.findAll( 'input' )[2]['value']
-
-        self.session.headers['Referer'] = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121605"
-
-        data3 = {"__EVENTTARGET": "",
-                 "__EVENTARGUMENT": "",
-                 "__VIEWSTATE": __VIEWSTATE3,
-                 'hidLanguage': "",
-                 "ddlXN": xn,
-                 "ddlXQ": xq,
-                 "ddl_kcxz": "",
-                 "Button1": u"成绩统计".encode( 'gb2312', 'replace' )}
-        response3 = self.session.post( url3_1, data = data3 )
-
-        ans = response3.content.decode( 'GBK' )
-
+        self.session.headers['Referer'] = self.baseUrl + "/xskbcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121603"
+        data2 = {
+            '__EVENTTARGET':'xqd',
+            '__EVENTARGUMENT':'',
+            '__VIEWSTATE':self.__VIEWSTATE2,
+            'xnd':xn,
+            'xqd':xq,
+        }
+        url2 = self.baseUrl + "/xskbcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121603"
+        response2 = self.session.get(url2,data = data2)
+        ans = response2.content.decode('GBK')
+        # print(ans)
         return ans
