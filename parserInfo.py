@@ -17,10 +17,6 @@ def get_GP(responser):
 
     for line in soup:
         td = line.findAll('td')
-        # i = 0
-        # for elem in td:
-        #     print(i,elem.text)
-        #     i += 1
         tmp = gpa.copy()
         tmp['name'] = td[3].text #课程名称
         tmp['xf'] = td[6].text #学分
@@ -32,7 +28,6 @@ def get_GP(responser):
         gpa_all.append(tmp)
 
     return gpa_all
-
 
 def get_sch(responser):
     kebiaoOrigin = responser

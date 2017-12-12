@@ -1,20 +1,17 @@
 import pymysql
 import json
+import sqlite3
 
 class data_conn:
     def __init__(self):
-        with open('base_info.json') as json_file:
+        with open('json/base_info.json') as json_file:
             base_data = json.load(json_file)
-        db_data = base_data['database']
-        self.hostname = db_data['db_hostname']
-        self.username = db_data['db_username']
-        self.passwd = db_data['db_passwd']
-        self.select_database = db_data['db_select_database']
+
+        self.db_name = base_data['database']
         self.conn = None
 
     def start(self):
-        self.conn = pymysql.connect(host = self.hostname,port=3306,user = self.username, password = self.passwd,
-                                    db = self.select_database,charset='utf8')
+        self.conn = sqlite3.connect('db/' + self.db_name)
         pass
 
     def end(self):

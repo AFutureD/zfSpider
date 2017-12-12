@@ -1,13 +1,8 @@
 {
     "jiaowu":{
         "stu_number": "",
-        "stu_passwd": ""
-
+        "stu_passwd": "",
+        "pic2Num": ""
     },
-    "database":{
-        "db_username": "",
-        "db_passwd": "",
-        "db_hostname": "",
-        "db_select_database" : ""
-    }
+    "database":"zfDB.db"
 }

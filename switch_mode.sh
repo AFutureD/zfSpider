@@ -4,26 +4,6 @@ pub_file="json/base_info_pub.json"
 debug_file="json/base_info_debug.json"
 base_file="json/base_info.json"
 
-# if [ ! -e "$pub_file" ]
-# then
-# 	echo "Already change to publishing mode"
-# else 
-# 	mv "$base_file" "$debug_file"
-# 	mv "$pub_file" "$base_file"
-# 	echo "success to change to publishing mode"
-# 	ls
-# fi
-
-# if [ ! -e "$debug_file" ]
-# then
-# 	echo "Already change to debug mode"
-# else 
-# 	mv "$base_file" "$pub_file"
-# 	mv "$debug_file" "$base_file"
-# 	echo "succcess to change to debug mode"
-# 	ls
-# fi
-
 if [ ! -e "$pub_file" ] && [ -e "$debug_file" ];
 then 
 	echo "It's in publishing mode."

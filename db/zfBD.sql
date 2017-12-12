@@ -1,25 +1,4 @@
-/*
- Navicat Premium Data Transfer
 
- Source Server         : Tencent
- Source Server Type    : MySQL
- Source Server Version : 50717
- Source Host           : 123.207.229.127
- Source Database       : practice
-
- Target Server Type    : MySQL
- Target Server Version : 50717
- File Encoding         : utf-8
-
- Date: 06/24/2017 20:00:50 PM
-*/
-
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
---  Table structure for `course_schedule`
--- ----------------------------
 DROP TABLE IF EXISTS `course_schedule`;
 CREATE TABLE `course_schedule` (
   `course_id` varchar(16) NOT NULL,
@@ -33,7 +12,7 @@ CREATE TABLE `course_schedule` (
   `course_end_week` varchar(5) DEFAULT NULL,
   `course_odd_dual_bool` tinyint(1) DEFAULT '0',
   `course_odd_dual` varchar(5) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 -- ----------------------------
 --  Table structure for `courses_info`
@@ -45,7 +24,7 @@ CREATE TABLE `courses_info` (
   `course_nature` varchar(10) DEFAULT NULL,
   `course_credit` varchar(4) DEFAULT NULL,
   PRIMARY KEY (`course_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 -- ----------------------------
 --  Table structure for `grades_table`
@@ -60,7 +39,7 @@ CREATE TABLE `grades_table` (
   `grade_midterm` varchar(5) DEFAULT NULL,
   `grade_finalexam` varchar(5) DEFAULT NULL,
   `grade_total` varchar(5) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 -- ----------------------------
 --  Table structure for `login_info`
@@ -71,7 +50,7 @@ CREATE TABLE `login_info` (
   `stu_passwd` varchar(256) DEFAULT NULL,
   `login_time` date DEFAULT NULL,
   PRIMARY KEY (`stu_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 -- ----------------------------
 --  Table structure for `stu_info`
@@ -86,6 +65,5 @@ CREATE TABLE `stu_info` (
   `stu_college` varchar(100) DEFAULT NULL,
   `stu_major` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`stu_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
-SET FOREIGN_KEY_CHECKS = 1;

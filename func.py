@@ -88,7 +88,6 @@ def get_ics(schedule):
 
     return cal
 
-
 def get_cal(info):
     print("正在获取课程表...")
     schedule = info
@@ -130,11 +129,6 @@ def show_GP(info):
     for line in gpa_all:
         table.add_row([line['name'],line['xf'],line['jd'],line['ps'], line['qz'],line['qm'],line['cj']])
     print(table)
-
-def show_GPA(info):
-    print(info)
-
-
 
 def format_courses(courses):
 
@@ -268,8 +262,6 @@ def format_grades(grades):
     pass
 
 def show_courses(xn = None,xq = None):
-
-
     ob_sql = data_conn()
     ob_sql.start()
     conn_new = ob_sql.conn
@@ -302,7 +294,7 @@ def show_courses(xn = None,xq = None):
     ics = get_ics(courses)
     print("生成成功!")
 
-    file_name = 'output.ics'
+    file_name = 'output/course_schedule.ics'
     print("正在保存到..." + file_name)
     with open(file_name, 'wb') as f:
         f.write(ics.to_ical())
@@ -314,7 +306,6 @@ def show_courses(xn = None,xq = None):
 
 
     pass
-
 
 def show_grades(xn = None,xq = None):
 
@@ -367,4 +358,19 @@ def show_grades(xn = None,xq = None):
     for line in courses:
         table.add_row([line[0], line[1], line[2], line[3], line[4], line[5], line[6], line[7], line[8], line[9]])
     print(table)
+    pass
+
+def show_GPA(info):
+    print(info)
+
+def syncFromZf():
+
+    pass
+
+def sync2Db():
+
+    pass
+
+def sync2Local():
+
     pass
