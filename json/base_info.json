@@ -1,0 +1,8 @@
+{
+    "jiaowu":{
+        "stu_number": "",
+        "stu_passwd": "",
+        "pic2Num": ""
+    },
+    "database":"zfDB.db"
+}

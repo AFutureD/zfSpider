@@ -14,8 +14,8 @@ import parserInfo
 import func
 from database import data_conn
 import datetime
-from checkout import Predict
 from PIL import Image
+import json
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -23,13 +23,14 @@ IFLOGIN = "请登录"
 
 
 class Student:
-    def __init__(self,num = None,password = None):
+    def __init__(self,num = None,password = None,pic2Num = None):
         self.st_num = num  # 学号
         self.st_password = password  # 密码
         self.st_name = None  # 姓名
         self.st_urlName = None  # url编码后的姓名
         self.session = requests.session()
         self.baseUrl = "http://210.30.208.140/"
+        self.url2Num = pic2Num
         self.avail_courses_year = []
         self.avail_courses_term = []
         self.avail_grade_year = []
@@ -66,7 +67,6 @@ class Student:
                     jpg.write(image)
                     print("保存验证码到：" + DstDir)
                 os.popen("display " + DstDir)
-
             elif 'windows' in platform.system():
                 DstDir = os.getcwd() + "\\" + "code.jpeg"
                 # print(DstDir)
@@ -88,7 +88,13 @@ class Student:
             im = im.convert('RGB')
             im.save(DstDir, 'jpeg')
             # print(DstDir)
-            code = Predict.load_Predict(DstDir)
+
+            code = ''
+            with open('code.jpeg', 'rb') as codeFile:
+                postFile = {'attachment_file': ('code.jpeg', codeFile, 'image/png', {})}
+                r1 = requests.post(self.url2Num, files = postFile)
+                code = (json.loads(r1.text))['code']
+
             print(code)
             RadioButtonList1 = u"学生".encode('gb2312', 'replace')
             data = {
@@ -197,7 +203,11 @@ class Student:
 
     def update_all_info( self ):
 
+        formatter_string = "%y-%m-%d"
         time_info = self.latest_login_time()
+        time_info = date_time = datetime.datetime.strptime(time_info,'%Y-%m-%d')
+        time_info = time_info.date()
+        print(time_info)
         now_time = datetime.date.today()
 
         if (now_time - time_info).days < 2:
@@ -293,31 +303,8 @@ class Student:
 
         return xn,xq
 
-    '''
-    GPA
-    '''
     def sp_grades(self,xn = None,xq = None):
         # 选择学期
-
-        # while 1:
-        #     choice = input("请选择学年：\n")
-        #     if choice is not '':
-        #         try:
-        #             xn = self.avail_grade_year[int(choice) - 1]
-        #             break
-        #         except:
-        #             print("请输入数字")
-        #             continue
-        #
-        # while 1:
-        #     choice = input("请选择学期：\n")
-        #     if choice is not '':
-        #         try:
-        #             xq = self.avail_grade_term[int(choice) - 1]
-        #             break
-        #         except:
-        #             print("请输入数字")
-        #             continue
 
         url3_1 = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121605"
         self.session.headers['Referer'] = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121605"
@@ -334,38 +321,10 @@ class Student:
         response3 = self.session.post(url3_1,data=data3)
 
         ans = response3.content.decode('GBK')
-        return ans
-
-    '''
-    GPA
-    '''
+        return ans.encode('utf-8')
 
     def sp_GPA(self,xn = None,xq = None):
         # 选择学期
-
-        # while 1:
-        #     choice = input("请选择学年：\n")
-        #     if choice is not '':
-        #         try:
-        #             xn = self.avail_grade_year[int(choice) - 1]
-        #             break
-        #         except:
-        #             print("请输入数字")
-        #             continue
-        #
-        # while 1:
-        #     choice = input("请选择学期（可不输入）：\n")
-        #     if choice is not '':
-        #         try:
-        #             xq = self.avail_grade_term[int(choice) - 1]
-        #             break
-        #         except:
-        #             print("请输入数字")
-        #             continue
-        #     else:
-        #         xq = ''
-        #         break
-
         print(xn, xq)
 
         url3_1 = self.baseUrl + "/xscjcx.aspx?xh=" + self.st_num + "&xm=" + self.st_urlName + "&gnmkdm=N121605"
@@ -398,11 +357,8 @@ class Student:
         response2 = self.session.post(url2, data = data2)
         ans = response2.content.decode('GBK')
         # print(ans)
-        return ans
+        return ans.encode('utf-8')
 
-    '''
-        个人课表
-    '''
     def sp_class(self, xn = None,xq = None):
         # 选择学期
 
@@ -418,4 +374,4 @@ class Student:
         response2 = self.session.get(url2,data = data2)
         ans = response2.content.decode('GBK')
         # print(ans)
-        return ans
+        return ans.encode('utf-8')
