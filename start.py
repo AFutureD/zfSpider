@@ -15,15 +15,14 @@ import json
 
 def main():
 
-    with open('base_info.json') as json_file:
+    with open('json/base_info.json') as json_file:
         base_data = json.load(json_file)
     jiaowu_data = base_data['jiaowu']
 
-    ob = Student(num = jiaowu_data['stu_number'],password = jiaowu_data['stu_passwd'])
+    ob = Student(num = jiaowu_data['stu_number'],password = jiaowu_data['stu_passwd'],pic2Num = jiaowu_data['pic2Num'])
     ob.login() # login function,in order to log in the system.
     ob.get_ess()
     ob.latest_login_time()
-
 
 
     while 1:
